@@ -9,7 +9,7 @@ entries:
     name: das
     type: application
     urls:
-    - https://hobiga.github.io/designer_helm/das-0.1.0.tgz
+    - https://hobiga.github.io/designer_helm/das-9.0.14.tgz
     version: 0.1.0
   designer:
   - apiVersion: v1
@@ -19,6 +19,6 @@ entries:
     digest: a50800080dff4d52d74c601aa5787d61c035e009e6d1d98fa57be98fe32530d1
     name: designer
     urls:
-    - https://hobiga.github.io/designer_helm/designer-0.1.0.tgz
+    - https://hobiga.github.io/designer_helm/designer-9.0.15.tgz
     version: 0.1.0
 generated: "2020-01-28T14:53:31.404724+05:30"
