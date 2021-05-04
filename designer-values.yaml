@@ -21,8 +21,9 @@ deployment:
 desImage:
   # repository: sdocker-registry.genhtcc.com/designer/designer
   # repository: designercontainerregistry.azurecr.io/designer
-  repository: pureengage-docker-staging.jfrog.io/designer/designer
-  tag: 9.0.116.07.10
+  # repository: pureengage-docker-staging.jfrog.io/designer/designer
+  repository: engagemulticloudscontainerregistry.azurecr.io/designer
+  tag: 9.0.116.09.13
   # enable tag override as developer option - to pass designer image from values
   tag_override: true
   pullPolicy: IfNotPresent
@@ -40,8 +41,8 @@ volumes:
   logMountPath: /designer/logs
   logClaim: designer-logs
   logClaimSize: 5Gi
-  logStorageClass: nfs
-  workspaceStorageClass: nfs
+  logStorageClass: azurefile
+  workspaceStorageClass: azurefile
 
 # add healh check related variables here - Do not modify the current values until sure about the behaviour
 # containerPort - Port to send the health checks requests
@@ -106,13 +107,13 @@ service:
 ingress:
   enabled: true
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   paths: ["/"]
   hosts:
-    - designer.genhtcc.com
-    - designer.blue.genhtcc.com
-    - designer.green.genhtcc.com
+    - designer.avtexlabs.com
+    - designer.blue.avtexlabs.com
+    - designer.green.avtexlabs.com
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

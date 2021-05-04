@@ -17,8 +17,9 @@ deployment:
 # Image repo and container version
 dasImage:
   # repository: pureengage-docker-staging.jfrog.io/designer/das
-  repository: sdocker-registry.genhtcc.com/designer/das
-  tag: 9.0.111.05.5
+  # repository: sdocker-registry.genhtcc.com/designer/das
+  repository: engagemulticloudscontainerregistry.azurecr.io
+  tag: 9.0.111.08.8
   # enable tag override as developer option - to pass das image from values
   tag_override: true
   pullPolicy: IfNotPresent
@@ -42,13 +43,13 @@ dasVolumes:
 ingress:
   enabled: true
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   paths: ["/"]
   hosts:
-    - das.genhtcc.com
-    - das.blue.genhtcc.com
-    - das.green.genhtcc.com
+    - das.avtexlabs.com
+    - das.blue.avtexlabs.com
+    - das.green.avtexlabs.com
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
