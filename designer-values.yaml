@@ -1,0 +1,164 @@
+# Default values for designer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Deployment
+# replicaCount - Number of designer containers to be maintained all the time
+# strategy - upgrade strategy (Recreate / RollingUpdate)
+deployment:
+  # type should be - ReplicaSet / Deployment
+  type: Deployment
+  replicaCount: 2
+  maxReplicas: 10
+  color: green
+  # strategy - to select which type of resources to deploy (default/service/volume/ingress) 
+  # default is for rolling upgrade
+  # volume is for blue/green upgrade, this is to create pvc for the very first time
+  # ingress is for the blue/green upgrade, it will create ingress for the first time and update ingress during service cutover
+  # service is for upgrading blue/green designer service
+  strategy: service
+
+desImage:
+  # repository: sdocker-registry.genhtcc.com/designer/designer
+  # repository: designercontainerregistry.azurecr.io/designer
+  repository: pureengage-docker-staging.jfrog.io/designer/designer
+  tag: 9.0.116.07.10
+  # enable tag override as developer option - to pass designer image from values
+  tag_override: true
+  pullPolicy: IfNotPresent
+
+# volume/claim variables
+# workspaceMountPath - the path where the workspace volume to be mounted inside designer container
+# workspaceClaim, workspaceClaimSize - Name and size of the managed disk claim (pv needs to be created equalent size or greater)
+# logMountPath - the path where the designer logs volume to be inside container
+# logClaim, logClaimSize - Name and size of the log disk claim
+# storageClass - Name of the storageClass for dynamic provisioning (created seperately for on-premise )
+volumes:
+  workspaceMountPath: /designer/workspace
+  workspaceClaim: designer-managed-disk
+  workspaceClaimSize: 5Gi
+  logMountPath: /designer/logs
+  logClaim: designer-logs
+  logClaimSize: 5Gi
+  logStorageClass: nfs
+  workspaceStorageClass: nfs
+
+# add healh check related variables here - Do not modify the current values until sure about the behaviour
+# containerPort - Port to send the health checks requests
+# startupDelay - No of seconds to initiate health prob after container starts
+# checkInterval - Health check interval
+# failureCount - no of failures to make the container unhealty
+healthApi:
+  path: /health
+  containerPort: 8888
+  startupDelay: 20
+  checkInterval: 5
+  failureCount: 5
+
+nameOverride: ""
+fullnameOverride: ""
+
+# session releate configs
+sessionConfigs:
+  timeout: 600
+
+# private docker registry credential specification
+imagePullSecrets: [name: pureengage-docker-staging]
+  # - name: jfrogcreds
+
+# Provide container designer envs here. - TODO: Remove unused envs later
+designerEnv:
+  enabled: true
+  configname: "designer-config"
+  envs:
+    DES_PORT: "8888"
+    DES_APPSERVER_HOST: das
+    DES_APPSERVER_PORT: "80"
+    DES_DEPLOY_URL: "/workspaces"
+    DES_USE_HTCC: "false"
+    DES_HTCC_SERVER: "gws-usw1-int.genhtcc.com"
+    DES_HTCC_PORT: "80"
+    DES_ENABLE_ANALYTICS: "false"
+    DES_ES_URL: "http://es-spot.usw1.genhtcc.com"
+    DES_ES_SERVER: "es-spot.usw1.genhtcc.com"
+    DES_ES_PORT: "80"
+    DES_IU_NAME: ""
+    DES_ENV_TYPE: ""
+    DES_REDIS_HOST: ""
+    DES_REDIS_PORT: ""
+    DES_FILE_LOGGING_ENABLED: "false"
+designerSecrets:
+  enabled: true
+  configname: "designer-secret"
+  GWS_Client_id: "ZXh0ZXJuYWxfYXBpX2NsaWVudA=="
+  GWS_Client_secret: "c2VjcmV0"
+
+# Designer service port configs
+# type - ClusterIP/NodePort
+# port - port exposed by container
+# targetPort - port which is used by service for service to container port mapping
+# nodePort - 30180 (if needed to access DAS without ingress, select type - NodePort)
+service:
+  type: ClusterIP
+  port: 8888
+  targetPort: 8888
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths: ["/"]
+  hosts:
+    - designer.genhtcc.com
+    - designer.blue.genhtcc.com
+    - designer.green.genhtcc.com
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+   limits:
+    cpu: 1000m
+    memory: 1Gi
+   requests:
+    cpu: 500m
+    memory: 512Mi
+
+securityContext:
+  # This is to run as a non root user, only genesys user is supported now by the Designer base image
+  # this value value cannot be modified for now, 500 - is the id of genesys user
+  runAsUser: 500
+  runAsGroup: 500
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# If flowsettings needs to be controlled via values enable it here - flowsettings key can be overridden by seperate yaml file.
+# ex: helm upgrade designer --values flowsettings.yaml  ### flowsettings format is json
+flowsettings_enabled: false
+flowsettings: {}
+
+hpa:
+  enabled: false
+  targetCPUPercent: 70
+  targetMemoryPercent: 70
+
+monitoring:
+  enabled: false
+  scrapeInterval: 10s
+  
+annotations: {}
+
+labels:
+  tenant: "shared"
+ 
+priorityClassName: ""

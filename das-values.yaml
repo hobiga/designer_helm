@@ -1,0 +1,130 @@
+# ====== DAS =======
+
+# Deployment
+# replicaCount - Number of DAS containers to be maintained all the time
+deployment:
+  # type should be - ReplicaSet / Deployment
+  type: Deployment
+  replicaCount: 2
+  maxReplicas: 10
+  color: green
+  # strategy - to select which type of resources to deploy (default/ingress/service) 
+  # default is for rolling upgrade
+  # ingress is for the blue/green upgrade, it will create ingress for the first time and update ingress during service cutover
+  # service is for upgrading blue/green das service
+  strategy: service
+
+# Image repo and container version
+dasImage:
+  # repository: pureengage-docker-staging.jfrog.io/designer/das
+  repository: sdocker-registry.genhtcc.com/designer/das
+  tag: 9.0.111.05.5
+  # enable tag override as developer option - to pass das image from values
+  tag_override: true
+  pullPolicy: IfNotPresent
+
+# private docker registry credential specification
+imagePullSecrets: []
+  # - name: jfrogcreds
+
+# name override on the service/deployment
+nameOverride: ""
+fullnameOverride: ""
+
+# volume/claim variables
+dasVolumes:
+  workspaceMountPath: /das/www/workspaces
+  workspaceClaim: designer-managed-disk
+  logMountPath: /das/log
+  logClaim: designer-logs
+
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths: ["/"]
+  hosts:
+    - das.genhtcc.com
+    - das.blue.genhtcc.com
+    - das.green.genhtcc.com
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+# add healh check related variables here
+dasHealthapi:
+  path: /health
+  containerPort: 8081
+  startupDelay: 10
+  checkInterval: 5
+  failureCount: 3
+  timeoutSeconds: 5
+
+# DAS service port configs
+# type - ClusterIP/NodePort
+# port - port exposed by container
+# targetPort - port which is used by service for service to container port mapping
+# nodePort - 30280 (if needed to access DAS without ingress)
+dasService:
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+
+dasEnv:
+  enabled: true
+  envs:
+    DAS_FILE_LOGGING_ENABLED: "false"
+    DAS_LOG_LEVEL: "DEBUG"
+    DAS_STDOUT_LOGGING_ENABLE: "true"
+    DAS_SERVICES_ELASTICSEARCH_ENABLED: "false"
+    DAS_SERVICES_ELASTICSEARCH_HOST: "http://designer-es-client-service"
+    DAS_SERVICES_ELASTICSEARCH_PORT: "9200"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+dasresources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+   limits:
+    cpu: 600m
+    memory: 1Gi
+   requests:
+    cpu: 400m
+    memory: 512Mi
+
+securityContext:
+  # This is to run as a non root user, only genesys user is supported now by the Designer base image
+  # this value value cannot be modified for now, 500 - is the id of genesys user
+  runAsUser: 500
+  runAsGroup: 500
+
+hpa:
+  enabled: false
+  targetCPUPercent: 75
+  targetMemoryPercent: 70
+
+monitoring:
+  enabled: false
+  scrapeInterval: 10s
+  
+annotations: {}
+
+labels:
+  tenant: "shared"
+
+nodeSelector: {}
+
+priorityClassName: ""
+
+affinity: {}

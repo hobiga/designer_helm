@@ -1,0 +1,24 @@
+apiVersion: v1
+entries:
+  das:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2020-01-28T14:53:31.405506+05:30"
+    description: A Helm chart for Designer Application Server
+    digest: 3a64529e169b36a5ba3d2aa68d75ccdd7f1fd244e87094bfbbf8dd5975b53c06
+    name: das
+    type: application
+    urls:
+    - das-0.1.0.tgz
+    version: 0.1.0
+  designer:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2020-01-28T14:53:31.406033+05:30"
+    description: A Helm chart for Designer
+    digest: a50800080dff4d52d74c601aa5787d61c035e009e6d1d98fa57be98fe32530d1
+    name: designer
+    urls:
+    - designer-0.1.0.tgz
+    version: 0.1.0
+generated: "2020-01-28T14:53:31.404724+05:30"
